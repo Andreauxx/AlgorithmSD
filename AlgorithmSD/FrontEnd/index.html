@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+</head>
+<body>
+    <div class="container">
+        <h1>CSV File Upload</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="fileInput" class="file-label">Choose CSV File:</label>
+            <input type="file" name="file" id="fileInput" class="file-input" required />
+            <button type="submit" id="submitBtn" class="submit-btn">Upload CSV</button>
+        </form>
+
+        <h2>Analysis Results:</h2>
+        <div id="result"></div>
+        
+        <!-- Chart.js Canvas -->
+        <canvas id="myChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const resultDiv = document.getElementById('result');
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent form submission
+            submitBtn.disabled = true;  // Disable the button during processing
+            submitBtn.textContent = 'Uploading...';
+
+            const formData = new FormData(form);
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Display analysis results
+                    resultDiv.innerHTML = `<p>Total Students: ${result.total_students}</p>
+                        <p>Mean Correct Answers: ${result.correct_mean}</p>
+                        <p>Correct Answers Total: ${result.correct_answers_total}</p>
+                        <p>Incorrect Answers Total: ${result.incorrect_answers_total}</p>`;
+
+                    // Use Chart.js to create the graph
+                    const myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: result.graph_data.labels,
+                            datasets: result.graph_data.datasets
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    resultDiv.innerHTML = `<p class="error">Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            } finally {
+                submitBtn.disabled = false; // Re-enable the button
+                submitBtn.textContent = 'Upload CSV';
+            }
+        });
+    </script>
+</body>
+</html>
