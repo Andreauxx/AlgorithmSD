@@ -9,7 +9,7 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });  // Destination folder for file uploads
 
 // Serve static files from the "FrontEnd" directory
-app.use(express.static('FrontEnd'));  // Adjust this path if needed
+app.use(express.static('AlgorithmSD/FrontEnd')); // Adjust this path if needed
 
 // Route for students to upload their CSV file
 app.post('/upload', upload.single('file'), async (req, res) => {
@@ -80,6 +80,6 @@ async function performComplexAnalysis(rows) {
 }
 
 // Start the Node.js server
-app.listen(3000, () => {
-    console.log('Node.js server running on http://localhost:3000');
+app.listen(4000, () => {
+    console.log('Node.js server running on http://localhost:4000');
 });
